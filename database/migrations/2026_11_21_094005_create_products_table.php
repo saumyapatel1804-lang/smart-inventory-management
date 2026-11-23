@@ -22,6 +22,13 @@ return new class extends Migration
             $table->decimal('base_price', 12, 2);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+
+            $table->index(['category_id', 'is_active']);
+            // sorting products by name.
+            $table->index('name');
+            // price filtering.
+            $table->index('base_price');
             });
     }
 

@@ -15,6 +15,11 @@ class Stock extends Model
         'reserved_quantity',
     ];
 
+    protected $casts = [
+        'quantity' => 'integer',
+        'reserved_quantity' => 'integer',
+    ];
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -24,4 +29,18 @@ class Stock extends Model
     {
         return $this->belongsTo(Warehouse::class);
     }
+
+    public function scopeAvailable($query)
+    {
+        return $query->whereColumn('quantity', '>', 'reserved_quantity');
+    }
+
+    public function scopeLowStock($query, $threshold = 10)
+    {
+        return $query->whereRaw(
+            '(quantity - reserved_quantity) <= ?',
+            [$threshold]
+        );
+    }
+
 }

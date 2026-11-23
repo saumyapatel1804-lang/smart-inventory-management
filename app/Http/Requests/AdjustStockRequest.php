@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class AdjustStockRequest extends FormRequest
 {
@@ -11,7 +12,7 @@ class AdjustStockRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +23,21 @@ class AdjustStockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'product_id' => ['required','integer','exists:products,id'],
+            'warehouse_id' => ['required','integer','exists:warehouses,id'],
+            'movement_type' => [
+                'required',
+                Rule::in([
+                    'stock_in',
+                    'stock_out',
+                    'reservation',
+                    'reservation_release',
+                ]),
+            ],
+
+            'quantity' => ['required','integer','min:1'],
+            'note' => ['required','string','max:190'],
+
         ];
     }
 }

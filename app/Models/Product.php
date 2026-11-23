@@ -30,4 +30,25 @@ class Product extends Model
     {
         return $this->hasMany(StockMovement::class);
     }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('name', 'LIKE', "%{$search}%")
+            ->orWhere('sku', 'LIKE', "%{$search}%");
+        });
+    }
+
+    public function scopePriceBetween($query, $min, $max)
+    {
+        return $query
+            ->when($min !== null, fn ($q) => $q->where('base_price', '>=', $min))
+            ->when($max !== null, fn ($q) => $q->where('base_price', '<=', $max));
+    }
+
 }

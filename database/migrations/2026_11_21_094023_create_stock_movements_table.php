@@ -24,6 +24,8 @@ return new class extends Migration
             $table->nullableMorphs('reference');
             $table->text('note')->nullable();
             $table->timestamp('moved_at');
+
+            $table->index(['product_id', 'moved_at']);
         });
     }
 

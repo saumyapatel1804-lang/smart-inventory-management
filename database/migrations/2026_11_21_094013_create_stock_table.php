@@ -24,6 +24,8 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['product_id', 'warehouse_id']);
+
+            $table->index(['warehouse_id', 'product_id']);
         });
     }
 

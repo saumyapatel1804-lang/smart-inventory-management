@@ -17,6 +17,8 @@ class StockMovement extends Model
         'moved_at',
     ];
 
+    public $timestamps = false;
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -30,5 +32,25 @@ class StockMovement extends Model
     public function reference()
     {
         return $this->morphTo();
+    }
+
+    public function scopeOfType($query, $type)
+    {
+        return $query->where('movement_type', $type);
+    }
+
+    public function scopeBetweenDates($query, $from, $to)
+    {
+        return $query
+            ->when($from, fn ($q) => $q->where(
+                'moved_at',
+                '>=',
+                \Carbon\Carbon::parse($from)->startOfDay()
+            ))
+            ->when($to, fn ($q) => $q->where(
+                'moved_at',
+                '<',
+                \Carbon\Carbon::parse($to)->addDay()->startOfDay()
+            ));
     }
 }

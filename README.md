@@ -1,66 +1,308 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Smart Inventory Management API
 
-## About Laravel
+A Laravel 11 REST API for managing products, categories, warehouses, stock adjustments, and inventory reporting.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 1. Technology Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.1+
+- Laravel 11
+- MySQL 8+
+- Redis
+- Predis
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 2. Installation and Setup
 
-## Learning Laravel
+### Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.1 or higher
+- Composer
+- MySQL 8+ *** Note: I developed and tested this project using my local WAMP setup. My local environment uses MySQL 5.7.40. ***
+- Redis-compatible server
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Clone the repository:
 
-## Laravel Sponsors
+```bash
+git clone https://github.com/saumyapatel1804-lang/smart-inventory-management.git
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Install dependencies:
 
-### Premium Partners
+```bash
+composer install
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Create environment configuration:
 
-## Contributing
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configure database settings in `.env`:
 
-## Code of Conduct
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=smart_inventory_management
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Configure Redis:
 
-## Security Vulnerabilities
+```env
+CACHE_STORE=redis
+REDIS_CLIENT=predis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Run migrations and seeders:
 
-## License
+```bash
+php artisan migrate --seed
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Clear cached configuration:
+
+```bash
+php artisan optimize:clear
+```
+
+Start the application:
+
+```bash
+php artisan serve
+```
+
+Base URL:
+
+`http://127.0.0.1:8000`
+
+## 3. API Reference
+
+    *** url and request info ***
+        1. Category Tree
+        - Method: GET
+        - URL: /api/categories/tree
+        - Description: Returns the complete nested category hierarchy, excluding inactive categories.
+        Request JSON: Not required.
+
+        2. Product Listing
+        - Method: GET
+        - URL: /api/products
+        - Description: Returns a paginated list of products with filtering and sorting.
+        Query example:
+        /api/products?category_id=2&warehouse_id=1&available=true&min_price=100&max_price=1000&search=laptop&sort_by=price&sort_order=asc&per_page=10
+
+
+        3. Stock Adjustment
+        - Method: POST
+        - URL: /api/stock/adjust
+        - Description: Adjusts product stock, handles reservations, and records stock movements.
+        Request JSON:
+        {
+            "product_id": 1,
+            "warehouse_id": 1,
+            "movement_type": "stock_in",
+            "quantity": 10,
+            "note": "New stock received"
+        }
+
+
+        4. Inventory Summary
+        - Method: GET
+        - URL: /api/inventory/summary
+        - Description: Returns total quantity, reserved quantity, available quantity, highest-stock warehouse, and zero-stock status.
+        Request JSON: Not required.
+
+        5. Product Movement History
+        - Method: GET
+        - URL: /api/products/{product}/movements
+        - Description: Returns paginated stock movement history and movement summary for a product.
+        Query example:
+        /api/products/1/movements?date_from=2026-11-01&date_to=2026-11-23&per_page=20
+
+
+        6. Low Stock Alert
+        - Method: GET
+        - URL: /api/inventory/low-stock
+        - Description: Returns products with low available stock, ordered by available quantity (ascending).
+        Query example:
+        /api/inventory/low-stock?threshold=10&page=1
+
+### Category Tree
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/categories/tree` | Returns nested category hierarchy |
+
+Inactive categories are excluded. Their active children are placed under the nearest active ancestor.
+
+### Product Listing
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/products` | Returns paginated products |
+
+Supported query parameters:
+
+- `product_id`
+- `category_id`
+- `warehouse_id`
+- `available`
+- `min_price`
+- `max_price`
+- `search`
+- `sort_by` (name, price, available_stock)
+- `sort_order` (asc, desc)
+- `per_page`
+
+### Stock Adjustment
+
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/stock/adjust` | Adjusts stock and records movement |
+
+Request example:
+
+```json
+{
+    "product_id": 1,
+    "warehouse_id": 1,
+    "movement_type": "stock_in",
+    "quantity": 10,
+    "note": "New stock received"
+}
+```
+
+Accepted movement types:
+
+- stock_in
+- stock_out
+- reservation
+- reservation_release
+
+### Inventory Summary
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/inventory/summary` | Returns inventory summary across products and warehouses |
+
+Includes total quantity, reserved quantity, available quantity, highest-stock warehouse, and zero-stock status.
+
+### Product Movement History
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/products/{id}/movements` | Returns paginated movement history |
+
+Query parameters:
+
+- `date_from`
+- `date_to`
+- `per_page` (default: 20)
+
+Includes database-level movement aggregation.
+
+### Low Stock Alert
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/inventory/low-stock` | Returns products with low available stock |
+
+Query parameters:
+
+- `threshold` (default: 10)
+- `page`
+
+Results are ordered by available quantity, ascending.
+
+## 4. Caching Strategy
+
+Redis is used as the application cache store.
+
+### Cache Keys
+
+| Cache key | Purpose | TTL |
+|---|---|---|
+| `categories:tree` | Category hierarchy | 1 hour |
+| `inventory:summary` | Inventory summary | Check implementation |
+| `inventory:low-stock:v1:version:{version}:threshold:{threshold}:page:{page}:per_page:{perPage}` | Low-stock results | 1 hour |
+
+### Cache Invalidation
+
+- Category tree: Invalidated when a category is saved or deleted.
+- Inventory summary: Invalidated after a successful stock adjustment.
+- Low-stock results: Cache version is incremented after a successful stock adjustment.
+
+Empty result sets and error responses are not cached.
+
+### Cache Warming
+
+The category tree endpoint is warmed using:
+
+```bash
+php artisan cache:warm-category-tree
+```
+
+This preloads the category hierarchy into Redis so the first API request does not need to build it.
+
+## 5. Indexing Decisions
+
+| Table | Index | Reason |
+|---|---|---|
+| categories | parent_id, is_active | Category hierarchy lookup |
+| categories | slug (unique) | Unique category slugs |
+| products | category_id, is_active | Active products by category |
+| products | name | Name sorting/search support |
+| products | base_price | Price filtering and sorting |
+| products | sku (unique) | Unique SKU lookup |
+| stock | product_id, warehouse_id (unique) | One stock record per product and warehouse |
+| stock | warehouse_id, product_id | Warehouse-first lookup |
+| stock_movements | product_id, moved_at | Product movement history and date filtering |
+| stock_movements | reference_type, reference_id | Polymorphic reference lookup |
+
+## 6. Database Seeding
+
+The seeders generate:
+
+- 11 categories with nested hierarchy.
+- 50 products.
+- 3 warehouses.
+- 150 stock records.
+- 200 stock movement records.
+
+Seed data includes zero-stock products, products across multiple warehouses, inactive categories with active children, and categories without products.
+
+## 7. Architecture
+
+The project follows Laravel's MVC architecture.
+
+- Models: Database relationships, casts, and query scopes.
+- Controllers: Handle incoming API requests.
+- Form Requests: Validate request input.
+- Services: Handle business logic.
+- API Resources: Format API responses.
+- Migrations: Define database structure, constraints, and indexes.
+- Seeders: Generate sample inventory data.
+
+## 8. Error Handling
+
+- Validation errors: HTTP 422.
+- Business rule violations: HTTP 422.
+- Unexpected errors: HTTP 500 without exposing internal details in production.
+
+## 9. Assumptions
+
+- Stock quantity and reserved quantity are maintained separately.
+- Available quantity is calculated as quantity minus reserved quantity.
+- Stock adjustments are performed within database transactions.
+- Stock movement history is retained as an immutable record.
+- Product listing defaults to 10 records per page.
+- Movement history defaults to 20 records per page.

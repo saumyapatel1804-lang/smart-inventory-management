@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Category extends Model
 {
@@ -27,5 +28,21 @@ class Category extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function ($category) {
+            Cache::store('redis')->forget('categories:tree');
+        });
+
+        static::deleted(function ($category) {
+            Cache::store('redis')->forget('categories:tree');
+        });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 }
